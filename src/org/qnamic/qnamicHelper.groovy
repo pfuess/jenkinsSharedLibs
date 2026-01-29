@@ -11,7 +11,7 @@ class qnamicHelper implements Serializable{
     qnamicHelper(def env){
         this.env=env
     }
-    
+
     /*** getSummary()
     oeffnet das xmlreport file und liesst dort die
     entsprechenden Testergebnisse heraus und berechnet die Erfolgsquote
@@ -127,22 +127,22 @@ class qnamicHelper implements Serializable{
     @return int Buildnr. des gestrigen Builds, oder null wenn nichts gefunden wurde
     */
     int getPrevRailOptBuildNr(String jobName, String RailOptEnv){
-    String yesterday=(new Date() - 1).format('dd.MM.yyyy')
-    def job = Jenkins.instance.getAllItems().find { it.fullName==jobName }
-    if(job==null)
-        return null
-    
-    String envJustBranch=(RailOptEnv.toLowerCase()=~/(trunk|branch)/)[0][1]
-    def curBuildName
-    def prevBuild=job.builds.find {
-        curBuildName=it.displayName.toLowerCase()=~/(trunk|branch)/
-        if(curBuildName.size()>0)
-            curBuildName[0][1] == envJustBranch && it.timestamp.format('dd.MM.yyyy') == yesterday
-    }
-    if(prevBuild==null)
-        return null
-    def m = prevBuild.description =~ /build[=:](\d+)/
-    m.size()>0?m[0][1].toInteger():null
+        String yesterday=(new Date() - 1).format('dd.MM.yyyy')
+        def job = Jenkins.instance.getAllItems().find { it.fullName==jobName }
+        if(job==null)
+            return null
+        
+        String envJustBranch=(RailOptEnv.toLowerCase()=~/(trunk|branch)/)[0][1]
+        def curBuildName
+        def prevBuild=job.builds.find {
+            curBuildName=it.displayName.toLowerCase()=~/(trunk|branch)/
+            if(curBuildName.size()>0)
+                curBuildName[0][1] == envJustBranch && it.timestamp.format('dd.MM.yyyy') == yesterday
+        }
+        if(prevBuild==null)
+            return null
+        def m = prevBuild.description =~ /build[=:](\d+)/
+        m.size()>0?m[0][1].toInteger():null
     }
 
     /** getRailOptJettyPort
@@ -198,7 +198,7 @@ class qnamicHelper implements Serializable{
     }
 
     @NonCPS
-    void copyRailOptLogsToArtefactsDirectory(File artefactsDir) {
+    void copyRailOptLogsToArtefactsDirectory(File artefactsDir, String RailOptPath) {
         String qTaskHome=System.properties['user.home']
         String railOptLogsPath="${RailOptPath}/logs"
         println "qTaskHome: $qTaskHome"
