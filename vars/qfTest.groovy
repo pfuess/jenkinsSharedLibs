@@ -10,5 +10,5 @@ def call(Map config=[:]){
         ${config.vars} ^
         -test \"${config.currentTest}\" ^
         -exitcode-ignore-exception -run ${config.currentSuite}
-    """
+    """.replaceAll(/ {2,}/,' ')
 }
