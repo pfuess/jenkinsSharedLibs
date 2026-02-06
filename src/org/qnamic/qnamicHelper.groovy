@@ -6,16 +6,16 @@ import groovy.xml.*
 import static groovy.io.FileType.*
 
 class qnamicHelper implements Serializable{
-    private final def env
+    private final def steps
 
-    qnamicHelper(def env){
-        this.env=env
+    qnamicHelper(def steps){
+        this.steps=steps
     }
 
     void createRunlogDirs(String app) {
         // 'mkdir' in Windows erstellt automatisch Zwischenverzeichnisse, 
         // wenn man den gesamten Pfad angibt.
-        bat """
+        steps.bat """
             if not exist "_qftestRunLogs\\${app}\\qrz" mkdir "_qftestRunLogs\\${app}\\qrz"
             if not exist "_qftestRunLogs\\${app}\\html" mkdir "_qftestRunLogs\\${app}\\html"
             if not exist "_qftestRunLogs\\${app}\\junit" mkdir "_qftestRunLogs\\${app}\\junit"
@@ -77,7 +77,7 @@ class qnamicHelper implements Serializable{
         }
     }
 
-    String getInstalledTomcatJavaVersion(Object steps, String environement){
+    String getInstalledTomcatJavaVersion(String environement){
         try{
             String tomcatJava=steps.bat(script: "C:/RailOpt_${environement}_Web/jre/bin/java.exe -version 2>&1", returnStdout: true)
             extractJavaVersion(tomcatJava)
@@ -96,7 +96,7 @@ class qnamicHelper implements Serializable{
         }
     }
 
-    String getInstalledKeycloakJavaVersion(Object steps, String environement){
+    String getInstalledKeycloakJavaVersion(String environement){
         try{
             String keycloakJava=steps.bat(script: "C:/RailOpt_${environement}_Keycloak/jre/bin/java.exe -version 2>&1", returnStdout: true)
             extractJavaVersion(keycloakJava)
@@ -105,7 +105,7 @@ class qnamicHelper implements Serializable{
         }
     }
 
-    String getInstalledDisJavaVersion(Object steps, String environement){
+    String getInstalledDisJavaVersion(String environement){
         try {
             String disJavaVersion=steps.bat(script: "C:/RailOpt_${environement}_DIS/jre/bin/java.exe -version 2>&1", returnStdout: true)
             extractJavaVersion(disJavaVersion)
@@ -127,7 +127,7 @@ class qnamicHelper implements Serializable{
     */
     @NonCPS
     def getVersionsMapFromJenkinsDescription(){
-        def job=Jenkins.instance.getItemByFullName(env.JOB_NAME)
+        def job=Jenkins.instance.getItemByFullName(steps.env.JOB_NAME)
         String s=job.getDescription()
         def m = s =~ /([\w-]+):[\s|]*([\d.]+)/
         m.collect {  mtch, g1, g2 -> [g1,g2] }.collectEntries()
@@ -190,7 +190,7 @@ class qnamicHelper implements Serializable{
 
     @NonCPS
     void copyExportedDBsToArtefactsDirectory(File artefactsDir) {
-        String path2DBDumpFiles="${env.WORKSPACE}/RailOpt/DBExport"
+        String path2DBDumpFiles="${steps.env.WORKSPACE}/RailOpt/DBExport"
 
         def DBDumpFiles=[]
 
@@ -275,7 +275,7 @@ class qnamicHelper implements Serializable{
 
     @NonCPS
     void copyAccumulatorsToArtefactsDirectory(File artefactsDir) {
-        String path2AccuFiles="${env.WORKSPACE}/RailOpt/Testdaten"
+        String path2AccuFiles="${steps.env.WORKSPACE}/RailOpt/Testdaten"
         println "path2AccuFiles: $path2AccuFiles"
         def accuFiles=[]
 
