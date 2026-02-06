@@ -1,3 +1,5 @@
+package org.qnamic.qnamicVersionChecker
+
 class qnamicVersionChecker implements Serializable {
     private final def steps
     
