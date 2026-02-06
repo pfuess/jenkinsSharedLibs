@@ -54,18 +54,6 @@ class qnamicHelper implements Serializable{
     öffnet version.txt im RailOpt Verzeichnis und liest dort versions informationen aus
     und gibt diese als map zurück
     */
-    // def getRailOptVersionInfo(String railOptDir) {
-    //     def versionFile=new File("$railOptDir\\version.txt")
-        
-    //     def bNr=versionFile.text =~ /(?<=build\.number=)\d+/
-    //     def jv=versionFile.text =~ /(?<=jre\.version=)[\d.]+/
-    //     def branch=versionFile.text =~ /(?<=scmBranch=)[\w.\/]+/
-    //     def ret=['build':bNr[0],
-    //             'javaVersion':jv[0],
-    //             'railOptBranch':branch[0].replaceAll(/build|branches|\//,'')]
-    //     ret
-    // }
-
     def getRailOptVersionInfo(String railOptDir) {
         def fileContent = steps.readFile("${railOptDir}\\version.txt")
         
@@ -179,9 +167,9 @@ class qnamicHelper implements Serializable{
     @return portnummer
     */
     def getRailOptJettyPort(String railOptDir) {
-        def versionFile=new File("$railOptDir/install/serverx.prop")
+        def fileContent = steps.readFile("${railOptDir}/install/serverx.prop")
         
-        def jettyHttpPort=versionFile.text =~ /(?<=jetty\.http\.port=)\d+/
+        def jettyHttpPort=fileContent =~ /(?<=jetty\.http\.port=)\d+/
         jettyHttpPort[0]
     }
 
@@ -232,7 +220,7 @@ class qnamicHelper implements Serializable{
         println "railOptLogsPath: $railOptLogsPath"
         def railOpt_logs=[]
 
-        new File("${qTaskHome}/RailOpt_${params.Umgebung}-Data").eachFileMatch(FILES,~/.+\D\.log/) {
+        new File("${qTaskHome}/RailOpt_${steps.params.Umgebung}-Data").eachFileMatch(FILES,~/.+\D\.log/) {
             railOpt_logs.add(it)
         }
         
@@ -258,7 +246,7 @@ class qnamicHelper implements Serializable{
         railOptDir.list().size()<20 ||    
         railOptDir.list().find { it=='version.txt' }==null ){
             currentBuild.description="RailOpt nicht, oder nicht vollständig installiert -> Testlauf wird abgebrochen"
-            helpers.sendEmail("RailOpt QFTestlauf ${params.Umgebung}","${currentBuild.description}\n\rJenkins-Link: ${BUILD_URL}")
+            helpers.sendEmail("RailOpt QFTestlauf ${steps.params.Umgebung}","${currentBuild.description}\n\rJenkins-Link: ${BUILD_URL}")
             currentBuild.result = 'ABORTED'
             return false
         }else{
@@ -310,12 +298,12 @@ class qnamicHelper implements Serializable{
     }
 
     void sendEmail(String subject, String msg) {
-        if(params.emailEmpfaenger!=''){
-            if(params.executeQFTest) {
+        if(steps.params.emailEmpfaenger!=''){
+            if(steps.params.executeQFTest) {
                 emailext(attachLog: true, 
                         body: msg, 
                         subject: subject,
-                        to: params.emailEmpfaenger)
+                        to: steps.params.emailEmpfaenger)
             } else {
                 emailext(attachLog: true,
                         body: 'QFTest Lauf wurde nicht ausgeführt -> Debugmode',
