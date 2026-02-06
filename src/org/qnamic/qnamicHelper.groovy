@@ -23,7 +23,6 @@ class qnamicHelper implements Serializable{
         """
     }
 
-
     /*** getSummary()
     oeffnet das xmlreport file und liesst dort die
     entsprechenden Testergebnisse heraus und berechnet die Erfolgsquote
@@ -55,16 +54,32 @@ class qnamicHelper implements Serializable{
     öffnet version.txt im RailOpt Verzeichnis und liest dort versions informationen aus
     und gibt diese als map zurück
     */
-    def getRailOptVersionInfo(String railOptDir) {
-        def versionFile=new File("$railOptDir\\version.txt")
+    // def getRailOptVersionInfo(String railOptDir) {
+    //     def versionFile=new File("$railOptDir\\version.txt")
         
-        def bNr=versionFile.text =~ /(?<=build\.number=)\d+/
-        def jv=versionFile.text =~ /(?<=jre\.version=)[\d.]+/
-        def branch=versionFile.text =~ /(?<=scmBranch=)[\w.\/]+/
-        def ret=['build':bNr[0],
-                'javaVersion':jv[0],
-                'railOptBranch':branch[0].replaceAll(/build|branches|\//,'')]
-        ret
+    //     def bNr=versionFile.text =~ /(?<=build\.number=)\d+/
+    //     def jv=versionFile.text =~ /(?<=jre\.version=)[\d.]+/
+    //     def branch=versionFile.text =~ /(?<=scmBranch=)[\w.\/]+/
+    //     def ret=['build':bNr[0],
+    //             'javaVersion':jv[0],
+    //             'railOptBranch':branch[0].replaceAll(/build|branches|\//,'')]
+    //     ret
+    // }
+
+    def getRailOptVersionInfo(String railOptDir) {
+        def fileContent = steps.readFile("${railOptDir}\\version.txt")
+        
+        def bNr = fileContent =~ /(?<=build\.number=)\d+/
+        def jv = fileContent =~ /(?<=jre\.version=)[\d.]+/
+        def branch = fileContent =~ /(?<=scmBranch=)[\w.\/]+/
+        
+        // Kleiner Check, ob die RegEx Treffer gefunden haben, um Fehler zu vermeiden
+        def ret = [
+            'build': bNr.find() ? bNr[0] : 'unknown',
+            'javaVersion': jv.find() ? jv[0] : 'unknown',
+            'railOptBranch': branch.find() ? branch[0].replaceAll(/build|branches|\//, '') : 'unknown'
+        ]
+        return ret
     }
 
     String getInstalledTomcatVersion(String environement){
