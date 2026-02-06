@@ -309,17 +309,16 @@ class qnamicHelper implements Serializable{
 
     void sendEmail(String subject, String msg) {
         if(steps.params.emailEmpfaenger!=''){
-            if(steps.params.executeQFTest) {
-                emailext(attachLog: true, 
-                        body: msg, 
-                        subject: subject,
-                        to: steps.params.emailEmpfaenger)
-            } else {
-                emailext(attachLog: true,
-                        body: 'QFTest Lauf wurde nicht ausgeführt -> Debugmode',
-                        subject: "QFTest-Lauf im Jenkinsjob simuliert",
-                        to: 'peter.fuess@qnamic.com')
-            }
+            steps.emailext(attachLog: true, 
+                           body: msg, 
+                           subject: subject,
+                           to: steps.params.emailEmpfaenger)
+            // } else {
+            //     steps.emailext(attachLog: true,
+            //             body: 'QFTest Lauf wurde nicht ausgeführt -> Debugmode',
+            //             subject: "QFTest-Lauf im Jenkinsjob simuliert",
+            //             to: 'peter.fuess@qnamic.com')
+            // }
         }
     }
 }
