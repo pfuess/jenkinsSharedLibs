@@ -1,4 +1,4 @@
-package org.qnamic.qnamicVersionChecker
+package org.qnamic
 
 class qnamicVersionChecker implements Serializable {
     private final def steps
@@ -95,7 +95,15 @@ class qnamicVersionChecker implements Serializable {
     falls in der Titelbeschreibung keine Versionen drin stehen gibt es null zurück
     */
     def getVersionsMapFromJenkinsDescription(String jobDescription){
+        if (!jobDescription) return [:]
+    
         def m = jobDescription =~ /([\w-]+):[\s|]*([\d.]+)/
-        m.collect {  mtch, g1, g2 -> [g1,g2] }.collectEntries()
+        def result = [:]
+        
+        // Klassische Schleife ist innerhalb von Jenkins-Pipelines am sichersten
+        while (m.find()) {
+            result[m.group(1)] = m.group(2)
+        }
+        return result
     }
-}
+} 

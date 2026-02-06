@@ -1,4 +1,4 @@
-package org.qnamic.qnamicHelper
+package org.qnamic
 
 import java.nio.file.*
 import java.util.zip.*
