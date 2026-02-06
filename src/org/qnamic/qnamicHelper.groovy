@@ -12,6 +12,18 @@ class qnamicHelper implements Serializable{
         this.env=env
     }
 
+    void createRunlogDirs(String app) {
+        // 'mkdir' in Windows erstellt automatisch Zwischenverzeichnisse, 
+        // wenn man den gesamten Pfad angibt.
+        bat """
+            if not exist "_qftestRunLogs\\${app}\\qrz" mkdir "_qftestRunLogs\\${app}\\qrz"
+            if not exist "_qftestRunLogs\\${app}\\html" mkdir "_qftestRunLogs\\${app}\\html"
+            if not exist "_qftestRunLogs\\${app}\\junit" mkdir "_qftestRunLogs\\${app}\\junit"
+            if not exist "_qftestRunLogs\\${app}\\xml" mkdir "_qftestRunLogs\\${app}\\xml"
+        """
+    }
+
+
     /*** getSummary()
     oeffnet das xmlreport file und liesst dort die
     entsprechenden Testergebnisse heraus und berechnet die Erfolgsquote
