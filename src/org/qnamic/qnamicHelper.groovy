@@ -55,7 +55,7 @@ class qnamicHelper implements Serializable{
     und gibt diese als map zurück
     */
     def getRailOptVersionInfo(String railOptDir) {
-        def fileContent = steps.readFile("${railOptDir}\\version.txt")
+        def fileContent = steps.readFile("${railOptDir}/version.txt")
         
         def bNr = fileContent =~ /(?<=build\.number=)\d+/
         def jv = fileContent =~ /(?<=jre\.version=)[\d.]+/
@@ -70,10 +70,13 @@ class qnamicHelper implements Serializable{
         return ret
     }
 
+    /* getInstalledTomcatVersion
+    liest die installierte tomcat version aus der RELEASE-NOTES datei aus
+    */
     String getInstalledTomcatVersion(String environement){
         try {
-            def releasenotes=new File("C:/RailOpt_${environement}_Web/RELEASE-NOTES")
-            def m = releasenotes.text =~ /Apache Tomcat Version ([\d.]+)/
+            def fileContent = steps.readFile("C:/RailOpt_${environement}_Web/RELEASE-NOTES")
+            def m = fileContent =~ /Apache Tomcat Version ([\d.]+)/
             m[0][1]
         }catch(exception){
             println exception.message
@@ -89,10 +92,13 @@ class qnamicHelper implements Serializable{
         }
     }
 
+    /* getInstalledKeycloakVersion
+    liest die installierte keycloak version aus der version.txt datei aus
+    */
     String getInstalledKeycloakVersion(String environement){
         try{
-            def version=new File("C:/RailOpt_${environement}_Keycloak/version.txt")
-            def m = version.text =~ /Version ([\d.]+)/
+            String fileContent=steps.readFile("C:/RailOpt_${environement}_Keycloak/version.txt")
+            def m = fileContent =~ /Version ([\d.]+)/
             m[0][1]
         }catch(exception){
             println exception.message
@@ -240,18 +246,22 @@ class qnamicHelper implements Serializable{
         }
     }
 
-    boolean checkIfRailOptCorrectlyInstalled(String RailOptPath){
-        def railOptDir=new File(RailOptPath)
-        if(railOptDir.exists()==false ||
-        railOptDir.list().size()<20 ||    
-        railOptDir.list().find { it=='version.txt' }==null ){
-            currentBuild.description="RailOpt nicht, oder nicht vollständig installiert -> Testlauf wird abgebrochen"
-            helpers.sendEmail("RailOpt QFTestlauf ${steps.params.Umgebung}","${currentBuild.description}\n\rJenkins-Link: ${BUILD_URL}")
-            currentBuild.result = 'ABORTED'
-            return false
-        }else{
-            println 'RailOpt scheint korrekt installiert zu sein'
-            return true
+    void checkIfRailOptCorrectlyInstalled(String railOptPath) {
+        // 1. Existenz des Verzeichnisses und der version.txt prüfen
+        boolean dirExists = steps.fileExists(railOptPath)
+        boolean versionFileExists = steps.fileExists("${railOptPath}/version.txt")
+
+        
+        if (!dirExists || !versionFileExists) {
+            String errorMsg = "RailOpt nicht, oder nicht vollständig installiert (Pfad: ${railOptPath}, Files: ${fileCount}) -> Testlauf wird abgebrochen"
+            
+            steps.currentBuild.description = errorMsg
+            // Beachte: 'helpers' muss hier im Kontext der Library bekannt sein oder übergeben werden
+            sendEmail("RailOpt QFTestlauf ${steps.params.Umgebung}", "${errorMsg}\n\rJenkins-Link: ${steps.env.BUILD_URL}")
+            
+            steps.error(errorMsg) // 'error' bricht den Build sofort mit einer Fehlermeldung ab
+        } else {
+            steps.echo 'RailOpt scheint korrekt installiert zu sein'
         }
     }
 
