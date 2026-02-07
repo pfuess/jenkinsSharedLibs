@@ -155,7 +155,7 @@ class qnamicHelper implements Serializable{
         steps.echo "Sammle Logs von ${sourceData} und ${sourceLogs}..."
         
         steps.bat """
-            robocopy "${sourceData}" "${targetDir}" *.log /NDL /NFL /NJH /NJS /R:3 /W:5
+            robocopy "${sourceData}" "${targetDir}" *.log /XF *-1.log /NDL /NFL /NJH /NJS /R:3 /W:5
             robocopy "${sourceLogs}" "${targetDir}" *.log /NDL /NFL /NJH /NJS /R:3 /W:5
             exit /b 0
         """
