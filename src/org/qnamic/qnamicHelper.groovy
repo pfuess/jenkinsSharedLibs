@@ -87,53 +87,17 @@ class qnamicHelper implements Serializable{
         jettyHttpPort[0]
     }
 
-    @NonCPS
-    void copyExportedDBsToArtefactsDirectory(File artefactsDir) {
+
+    void copyExportedDBsToArtefactsDirectory() {
         String path2DBDumpFiles="${steps.env.WORKSPACE}/RailOpt/DBExport"
 
-        def DBDumpFiles=[]
+        String targetDir = "_artifacts"
+        steps.bat "if not exist \"${targetDir}\" mkdir \"${targetDir}\""
 
-        new File(path2DBDumpFiles).eachFileMatch(FILES,~/.+.dump/) {
-            DBDumpFiles.add(it)
-        }
-
-        println 'railOpt_dump_files:'
-        DBDumpFiles.each {
-            if(it.exists()) {
-                println it.name
-                Files.copy(it.toPath(),
-                        artefactsDir.toPath().resolve(it.name), 
-                        StandardCopyOption.REPLACE_EXISTING)
-            }
-        }
-    }
-
-    @NonCPS
-    void copyRailOptLogsToArtefactsDirectory(File artefactsDir, String RailOptPath) {
-        String qTaskHome=System.properties['user.home']
-        String railOptLogsPath="${RailOptPath}/logs"
-        println "qTaskHome: $qTaskHome"
-        println "railOptLogsPath: $railOptLogsPath"
-        def railOpt_logs=[]
-
-        new File("${qTaskHome}/RailOpt_${steps.params.Umgebung}-Data").eachFileMatch(FILES,~/.+\D\.log/) {
-            railOpt_logs.add(it)
-        }
-        
-        new File(railOptLogsPath).eachFileMatch(FILES,~/.+\D\.log/) {
-            railOpt_logs.add(it)
-        }
-
-        //qnamic logs aus RailOpt und userhome Verzeichnis nach workspace kopieren
-        println 'railOpt_logs:'
-        railOpt_logs.each {
-            if(it.exists()) {
-                println it.name
-                Files.copy(it.toPath(),
-                        artefactsDir.toPath().resolve(it.name), 
-                        StandardCopyOption.REPLACE_EXISTING)
-            }
-        }
+        steps.bat """
+            robocopy "${path2DBDumpFiles}" "${targetDir}" *.dump /NDL /NFL /NJH /NJS /R:3 /W:5
+            exit /b 0
+        """
     }
 
     void collectRailOptLogs(String railOptPath) {
