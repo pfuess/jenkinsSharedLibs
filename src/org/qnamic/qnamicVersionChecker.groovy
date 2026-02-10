@@ -7,29 +7,31 @@ class qnamicVersionChecker implements Serializable {
         this.steps=steps
     }
 
-    def checkRailOptVersion() {
-        String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
-        def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
+    // def checkRailOptVersion() {
+    //     String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
+    //     def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
         
-        def RailOptVersionInfo=getRailOptVersionInfo(steps.env.RailOptPath)
-        println RailOptVersionInfo['javaVersion'] + '==' + expectedVersions['RailOpt-Java']
-        if(RailOptVersionInfo['javaVersion'] != expectedVersions['RailOpt-Java']){
-            String errMsg="erwartete RailOpt Java-Version nicht vorhanden\nerwartet: ${expectedVersions['RailOpt-Java']}\ninstalliert:${RailOptVersionInfo['javaVersion']}"
-            steps.currentBuild.description=errMsg
-            steps.error(errMsg)
-        }
-        return RailOptVersionInfo
-    }
+    //     def RailOptVersionInfo=getRailOptVersionInfo(steps.env.RailOptPath)
+    //     println RailOptVersionInfo['javaVersion'] + '==' + expectedVersions['RailOpt-Java']
+    //     if(RailOptVersionInfo['javaVersion'] != expectedVersions['RailOpt-Java']){
+    //         String errMsg="erwartete RailOpt Java-Version nicht vorhanden\nerwartet: ${expectedVersions['RailOpt-Java']}\ninstalliert:${RailOptVersionInfo['javaVersion']}"
+    //         steps.currentBuild.description=errMsg
+    //         steps.error(errMsg)
+    //     }
+    //     return RailOptVersionInfo
+    // }
 
-    void checkWebVersions() {
+    void checkVersions() {
         String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
         def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
         
         def installedVersions=[
+            'RailOpt-Java': getRailOptVersionInfo(steps.env.RailOptPath)['javaVersion'],
             'Tomcat': getInstalledTomcatVersion(steps.env.Umgebung),
             'Tomcat-Java': getInstalledTomcatJavaVersion(steps.env.Umgebung),
             'Keycloak': getInstalledKeycloakVersion(steps.env.Umgebung),
-            'Keycloak-Java': getInstalledKeycloakJavaVersion(steps.env.Umgebung)
+            'Keycloak-Java': getInstalledKeycloakJavaVersion(steps.env.Umgebung),
+            'DIS-Java': getInstalledDisJavaVersion(steps.env.Umgebung)
         ]
         
         expectedVersions.any { key, value ->
