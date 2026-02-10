@@ -10,15 +10,36 @@ class qnamicVersionChecker implements Serializable {
     def checkRailOptVersion() {
         String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
         def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
-        println "erwartete Versionen: $expectedVersions"
+        
         def RailOptVersionInfo=getRailOptVersionInfo(steps.env.RailOptPath)
         println RailOptVersionInfo['javaVersion'] + '==' + expectedVersions['RailOpt-Java']
         if(RailOptVersionInfo['javaVersion'] != expectedVersions['RailOpt-Java']){
             String errMsg="erwartete RailOpt Java-Version nicht vorhanden\nerwartet: ${expectedVersions['RailOpt-Java']}\ninstalliert:${RailOptVersionInfo['javaVersion']}"
             steps.currentBuild.description=errMsg
-            error(errMsg)
+            steps.error(errMsg)
         }
         return RailOptVersionInfo
+    }
+
+    void checkWebVersions() {
+        String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
+        def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
+        
+        def installedVersions=[
+            'Tomcat': getInstalledTomcatVersion(steps.env.Umgebung),
+            'Tomcat-Java': getInstalledTomcatJavaVersion(steps.env.Umgebung),
+            'Keycloak': getInstalledKeycloakVersion(steps.env.Umgebung),
+            'Keycloak-Java': getInstalledKeycloakJavaVersion(steps.env.Umgebung)
+        ]
+        
+        expectedVersions.any { key, value ->
+            println "Vergleiche ${key}: erwartet=${value} mit installiert=${installedVersions[key]}"
+            if (installedVersions[key] != value) {
+                String errMsg="erwartete ${key} Version nicht vorhanden\nerwartet: ${value}\ninstalliert:${installedVersions[key]}"
+                steps.currentBuild.description=errMsg
+                steps.error(errMsg)
+            }
+         }
     }
 
     /***
