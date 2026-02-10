@@ -7,6 +7,20 @@ class qnamicVersionChecker implements Serializable {
         this.steps=steps
     }
 
+    def checkRailOptVersion() {
+        String jobDesc = steps.currentBuild.rawBuild.project.description ?: ""
+        def expectedVersions=getVersionsMapFromJenkinsDescription(jobDesc)
+        println "erwartete Versionen: $expectedVersions"
+        def RailOptVersionInfo=getRailOptVersionInfo(steps.env.RailOptPath)
+        println RailOptVersionInfo['javaVersion'] + '==' + expectedVersions['RailOpt-Java']
+        if(RailOptVersionInfo['javaVersion'] != expectedVersions['RailOpt-Java']){
+            String errMsg="erwartete RailOpt Java-Version nicht vorhanden\nerwartet: ${expectedVersions['RailOpt-Java']}\ninstalliert:${RailOptVersionInfo['javaVersion']}"
+            steps.currentBuild.description=errMsg
+            error(errMsg)
+        }
+        return RailOptVersionInfo
+    }
+
     /***
     öffnet version.txt im RailOpt Verzeichnis und liest dort versions informationen aus
     und gibt diese als map zurück
