@@ -20,14 +20,22 @@ class qnamicVersionChecker implements Serializable {
             'DIS-Java': getInstalledDisJavaVersion(steps.env.Umgebung)
         ]
         
-        expectedVersions.any { key, value ->
-            println "Vergleiche ${key}: erwartet=${value} mit installiert=${installedVersions[key]}"
-            if (installedVersions[key] != value) {
-                String errMsg="erwartete ${key} Version nicht vorhanden\nerwartet: ${value}\ninstalliert:${installedVersions[key]}"
-                steps.currentBuild.description=errMsg
-                steps.error(errMsg)
-            }
-         }
+        def wrongVersions=expectedVersions.findAll { key, value ->
+            steps.echo "Vergleiche ${key}: erwartet=${value} mit installiert=${installedVersions[key]}"
+            installedVersions[key] != value
+        }
+        steps.echo "wrongVersions: ${wrongVersions}"
+
+        def errMsgs=wrongVersions?.collect { key, value ->
+            "${key}\nerwartet: ${value}\ninstalliert:${installedVersions[key]}"
+        }
+        
+        if(errMsgs?.size()>0){
+            steps.currentBuild.description="falsche Versionen:\n${errMsgs.join('\n')}"
+            steps.error(errMsgs.join('\n'))
+        } else {
+            steps.echo 'Alle Versionen scheinen korrekt installiert zu sein'
+        }
     }
 
     /***
