@@ -100,37 +100,72 @@ class qnamicHelper implements Serializable{
         """
     }
 
+    /**dirRoboCopy
+        kopiert Dateien eines Verzeichnisses in ein Anderes
+        ohne new file zu benutzen, da dies unsicher sein soll
+        stattdessen wird robocopy verwendet, ein batch befehl in der windows konsole
+        IN ARBEIT!!!
+    */
+    void dirRoboCopy(String sourceDir, String targetDir, String filter = "*", String exclude = "") {
+        // Falls explizit null übergeben wird, greifen die Default-Werte oben nicht, 
+        // daher zur Sicherheit die interne Absicherung:
+        def f = filter ?: "*"
+        def x = exclude ? "/XF ${exclude}" : ""
+
+        //  Kopieren mit Robocopy
+        // /S = Unterverzeichnisse, /NJH /NJS /NFL /NDL = Weniger Log-Spam im Jenkins
+        // /R:3 /W:5 bei Problemen nur 3 Versuche mit jeweils 5s Wartezeit 
+        // Wir hängen "|| exit /b 0" an, da Robocopy Exit-Codes > 0 liefert, auch wenn alles okay ist
+        steps.echo "Kopiere von ${sourceDir} nach ${targetDir} (Filter: ${f}, Exclude: ${exclude ?: 'keiner'})"
+        
+        steps.bat """
+            if not exist "${targetDir}" mkdir "${targetDir}"
+            robocopy "${sourceDir}" "${targetDir}" ${f} ${x} /NDL /NFL /NJH /NJS /R:3 /W:5
+            exit /b 0
+        """
+    }
+
     void collectRailOptLogs(String railOptPath) {
         // 1. Pfade definieren (lokal auf dem Agenten)
         // Wir nutzen env.USERPROFILE statt System.properties, da wir auf dem Agenten sind
         String qTaskHome = steps.env.USERPROFILE 
-        String sourceData = "${qTaskHome}\\RailOpt_${steps.params.Umgebung}-Data"
-        String sourceLogs = "${railOptPath}\\logs"
-        
-        // Ziel im Workspace (relativ)
-        String targetDir = "_artifacts"
-        
-        // 2. Zielverzeichnis sicherstellen
-        steps.bat "if not exist \"${targetDir}\" mkdir \"${targetDir}\""
-
-        // 3. Kopieren mit Robocopy
-        // /S = Unterverzeichnisse, /NJH /NJS /NFL /NDL = Weniger Log-Spam im Jenkins
-        // Wir hängen "|| exit /b 0" an, da Robocopy Exit-Codes > 0 liefert, auch wenn alles okay ist
-        steps.echo "Sammle Logs von ${sourceData} und ${sourceLogs}..."
-        
-        steps.bat """
-            robocopy "${sourceData}" "${targetDir}" *.log /XF *-1.log /NDL /NFL /NJH /NJS /R:3 /W:5
-            robocopy "${sourceLogs}" "${targetDir}" *.log /NDL /NFL /NJH /NJS /R:3 /W:5
-            exit /b 0
-        """
+        String clientLogs = "${qTaskHome}\\RailOpt_${steps.params.Umgebung}-Data"
+        String serverLogs = "${railOptPath}\\logs"
+               
+        dirRoboCopy(clientLogs,'_artifacts','*.log','*-1.log')
+        dirRoboCopy(serverLogs,'_artifacts','*.log')
     }
+
+    // void collectRailOptLogs(String railOptPath) {
+    //     // 1. Pfade definieren (lokal auf dem Agenten)
+    //     // Wir nutzen env.USERPROFILE statt System.properties, da wir auf dem Agenten sind
+    //     String qTaskHome = steps.env.USERPROFILE 
+    //     String sourceData = "${qTaskHome}\\RailOpt_${steps.params.Umgebung}-Data"
+    //     String sourceLogs = "${railOptPath}\\logs"
+        
+    //     // Ziel im Workspace (relativ)
+    //     String targetDir = "_artifacts"
+        
+    //     // 2. Zielverzeichnis sicherstellen
+    //     steps.bat "if not exist \"${targetDir}\" mkdir \"${targetDir}\""
+
+    //     // 3. Kopieren mit Robocopy
+    //     // /S = Unterverzeichnisse, /NJH /NJS /NFL /NDL = Weniger Log-Spam im Jenkins
+    //     // Wir hängen "|| exit /b 0" an, da Robocopy Exit-Codes > 0 liefert, auch wenn alles okay ist
+    //     steps.echo "Sammle Logs von ${sourceData} und ${sourceLogs}..."
+        
+    //     steps.bat """
+    //         robocopy "${sourceData}" "${targetDir}" *.log /XF *-1.log /NDL /NFL /NJH /NJS /R:3 /W:5
+    //         robocopy "${sourceLogs}" "${targetDir}" *.log /NDL /NFL /NJH /NJS /R:3 /W:5
+    //         exit /b 0
+    //     """
+    // }
 
     void checkIfRailOptCorrectlyInstalled(String railOptPath) {
         // 1. Existenz des Verzeichnisses und der version.txt prüfen
         boolean dirExists = steps.fileExists(railOptPath)
         boolean versionFileExists = steps.fileExists("${railOptPath}/version.txt")
 
-        
         if (!dirExists || !versionFileExists) {
             String errorMsg = "RailOpt nicht, oder nicht vollständig installiert (Pfad: ${railOptPath}, Files: ${fileCount}) -> Testlauf wird abgebrochen"
             
