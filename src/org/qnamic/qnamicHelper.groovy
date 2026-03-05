@@ -119,8 +119,10 @@ class qnamicHelper implements Serializable{
         steps.echo "Kopiere von ${sourceDir} nach ${targetDir} (Filter: ${f}, Exclude: ${exclude ?: 'keiner'})"
         
         steps.bat """
+            @echo off
             if not exist "${targetDir}" mkdir "${targetDir}"
             robocopy "${sourceDir}" "${targetDir}" ${f} ${x} /NDL /NFL /NJH /NJS /R:3 /W:5
+            if %ERRORLEVEL% GEQ 8 exit /b 1
             exit /b 0
         """
     }
@@ -135,31 +137,6 @@ class qnamicHelper implements Serializable{
         dirRoboCopy(clientLogs,'_artifacts','*.log','*-1.log')
         dirRoboCopy(serverLogs,'_artifacts','*.log')
     }
-
-    // void collectRailOptLogs(String railOptPath) {
-    //     // 1. Pfade definieren (lokal auf dem Agenten)
-    //     // Wir nutzen env.USERPROFILE statt System.properties, da wir auf dem Agenten sind
-    //     String qTaskHome = steps.env.USERPROFILE 
-    //     String sourceData = "${qTaskHome}\\RailOpt_${steps.params.Umgebung}-Data"
-    //     String sourceLogs = "${railOptPath}\\logs"
-        
-    //     // Ziel im Workspace (relativ)
-    //     String targetDir = "_artifacts"
-        
-    //     // 2. Zielverzeichnis sicherstellen
-    //     steps.bat "if not exist \"${targetDir}\" mkdir \"${targetDir}\""
-
-    //     // 3. Kopieren mit Robocopy
-    //     // /S = Unterverzeichnisse, /NJH /NJS /NFL /NDL = Weniger Log-Spam im Jenkins
-    //     // Wir hängen "|| exit /b 0" an, da Robocopy Exit-Codes > 0 liefert, auch wenn alles okay ist
-    //     steps.echo "Sammle Logs von ${sourceData} und ${sourceLogs}..."
-        
-    //     steps.bat """
-    //         robocopy "${sourceData}" "${targetDir}" *.log /XF *-1.log /NDL /NFL /NJH /NJS /R:3 /W:5
-    //         robocopy "${sourceLogs}" "${targetDir}" *.log /NDL /NFL /NJH /NJS /R:3 /W:5
-    //         exit /b 0
-    //     """
-    // }
 
     void checkIfRailOptCorrectlyInstalled(String railOptPath) {
         // 1. Existenz des Verzeichnisses und der version.txt prüfen
