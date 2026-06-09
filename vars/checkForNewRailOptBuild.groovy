@@ -8,5 +8,5 @@ def call(Map config) {
     int currBuildNr=checker.getRailOptVersionInfo(env.RailOptPath)['build'].toInteger()
     echo "prevBuildNr=$prevBuildNr currBuildNr=${currBuildNr}"
     if(currBuildNr==prevBuildNr)
-        currentBuild.description="KEIN NEUER RAILOPTBUILD\n\r " + currentBuild.description
+        currentBuild.description="KEIN NEUER RAILOPTBUILD<br>" + currentBuild.description
 }
