@@ -70,7 +70,7 @@ class qnamicHelper implements Serializable{
         }
         if(prevBuild==null)
             return null
-        def m = prevBuild.description =~ /\(Regression\)\[(\d+),.+\]/
+        def m = prevBuild.description =~ /\(\w+\)\[(\d+),.+\]/
         m.size()>0?m[0][1].toInteger():null
     }
 
@@ -200,7 +200,8 @@ class qnamicHelper implements Serializable{
 
     void sendEmail(String subject, String msg) {
         if(steps.params.emailEmpfaenger!=''){
-            steps.emailext(attachLog: true, 
+            steps.emailext(attachLog: true,
+                           mimeType: 'text/html', 
                            body: msg, 
                            subject: subject,
                            to: steps.params.emailEmpfaenger)
