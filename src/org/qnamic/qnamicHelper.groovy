@@ -55,7 +55,7 @@ class qnamicHelper implements Serializable{
     @param RailOptEnv RailOpt Umgebung -> (PGTRUNK,PRBRANCH,ORATRUNK,ORABRANCH)
     @return int Buildnr. des gestrigen Builds, oder null wenn nichts gefunden wurde
     */
-    int getPrevRailOptBuildNr(String jobName, String RailOptEnv){
+    Integer getPrevRailOptBuildNr(String jobName, String RailOptEnv){
         String yesterday=(new Date() - 1).format('dd.MM.yyyy')
         def job = Jenkins.instance.getAllItems().find { it.fullName==jobName }
         if(job==null)
@@ -70,7 +70,7 @@ class qnamicHelper implements Serializable{
         }
         if(prevBuild==null)
             return null
-        def m = prevBuild.description =~ /build[=:](\d+)/
+        def m = prevBuild.description =~ /\(Regression\)\[(\d+),.+\]/
         m.size()>0?m[0][1].toInteger():null
     }
 
