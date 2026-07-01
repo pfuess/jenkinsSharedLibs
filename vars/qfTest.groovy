@@ -12,16 +12,18 @@ def call(Map config=[:]){
             -exitcode-ignore-exception -run ${config.currentSuite}
         """.replaceAll(/ {2,}/,' ')
     } finally {
-        publishHTML([
-            allowMissing          : false, 
-            alwaysLinkToLastBuild : false, 
-            keepAll               : true, 
-            reportDir             : "_qftestRunLogs/${config.app}/html",
-            reportFiles           : 'report.html', 
-            reportName            : "${config.app == 'RO' ? 'RailOpt' : config.app} Report", 
-            //reportTitles          : 'RailOpt Regression', 
-            useWrapperFileDirectly: true
-        ])
+        if(config.publishHtml){
+            publishHTML([
+                allowMissing          : false, 
+                alwaysLinkToLastBuild : false, 
+                keepAll               : true, 
+                reportDir             : "_qftestRunLogs/${config.app}/html",
+                reportFiles           : 'report.html', 
+                reportName            : "${config.app == 'RO' ? 'RailOpt' : config.app} Report", 
+                //reportTitles          : 'RailOpt Regression', 
+                useWrapperFileDirectly: true
+            ])
+        }
     }
 
 }
