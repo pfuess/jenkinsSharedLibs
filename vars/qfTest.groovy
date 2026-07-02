@@ -2,7 +2,7 @@ def call(Map config=[:]){
     try {
         bat """
             qftestc.exe -batch -allowkilling -engine swt,awt ^
-            -runlog ${env.WORKSPACE}/_qftestRunLogs/${config.app}/qrz/Regression.qzp ^
+            -runlog ${env.WORKSPACE}/_qftestRunLogs/${config.app}/qrz/${config.reportTitle}.qzp ^
             -report.html ${env.WORKSPACE}/_qftestRunLogs/${config.app}/html ^
             -report.junit ${env.WORKSPACE}/_qftestRunLogs/${config.app}/junit ^
             -report.xml ${env.WORKSPACE}/_qftestRunLogs/${config.app}/xml ^
@@ -20,7 +20,7 @@ def call(Map config=[:]){
                 reportDir             : "_qftestRunLogs/${config.app}/html",
                 reportFiles           : 'report.html', 
                 reportName            : "${config.app == 'RO' ? 'RailOpt' : config.app} Report", 
-                //reportTitles          : 'RailOpt Regression', 
+                reportTitles          : "RailOpt ${config.reportTitle}", 
                 useWrapperFileDirectly: true
             ])
         }
