@@ -3,9 +3,9 @@ def call(Map config=[:]){
         bat """
             qftestc.exe -batch -allowkilling -engine swt,awt ^
             -runlog ${env.WORKSPACE}/_qftestRunLogs/${config.app}/qrz/${config.reportTitle}.qzp ^
-            -report.html ${env.WORKSPACE}/_qftestRunLogs/${config.app}/html ^
-            -report.junit ${env.WORKSPACE}/_qftestRunLogs/${config.app}/junit ^
-            -report.xml ${env.WORKSPACE}/_qftestRunLogs/${config.app}/xml ^
+            -report.html ${env.WORKSPACE}/_qftestRunLogs/${config.app}/html/${config.reportTitle} ^
+            -report.junit ${env.WORKSPACE}/_qftestRunLogs/${config.app}/junit/${config.reportTitle} ^
+            -report.xml ${env.WORKSPACE}/_qftestRunLogs/${config.app}/xml/${config.reportTitle} ^
             -report-thumbnails -report-scale-thumbnails 16 ^
             ${config.vars} ^
             -test \"${config.currentTest}\" ^
@@ -17,10 +17,10 @@ def call(Map config=[:]){
                 allowMissing          : false, 
                 alwaysLinkToLastBuild : false, 
                 keepAll               : true, 
-                reportDir             : "_qftestRunLogs/${config.app}/html",
-                reportFiles           : "${config.reportTitle}.html", 
-                reportName            : "${config.app == 'RO' ? 'RailOpt' : config.app} Report", 
-                reportTitles          : "RailOpt ${config.reportTitle}", 
+                reportDir             : "_qftestRunLogs/${config.app}/html/${config.reportTitle}",
+                reportFiles           : "report.html", 
+                reportName            : "${config.app} ${config.reportTitle} Report", 
+                reportTitles          : "${config.reportTitle}", 
                 useWrapperFileDirectly: true
             ])
         }
