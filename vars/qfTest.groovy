@@ -18,7 +18,7 @@ def call(Map config=[:]){
                 alwaysLinkToLastBuild : false, 
                 keepAll               : true, 
                 reportDir             : "_qftestRunLogs/${config.app}/html",
-                reportFiles           : 'report.html', 
+                reportFiles           : "${config.reportTitle}.html", 
                 reportName            : "${config.app == 'RO' ? 'RailOpt' : config.app} Report", 
                 reportTitles          : "RailOpt ${config.reportTitle}", 
                 useWrapperFileDirectly: true
