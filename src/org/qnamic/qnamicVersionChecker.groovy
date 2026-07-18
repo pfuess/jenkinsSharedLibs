@@ -128,7 +128,7 @@ class qnamicVersionChecker implements Serializable {
     def getVersionsMapFromJenkinsDescription(String jobDescription){
         if (!jobDescription) return [:]
     
-        def m = jobDescription =~ /([\w-]+):[\s|]*([\d.]+)/
+        def m = jobDescription =~ /([\w-]+)[\s|]*([\d.]{5,})/
         def result = [:]
         
         // Klassische Schleife ist innerhalb von Jenkins-Pipelines am sichersten
